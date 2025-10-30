@@ -1,0 +1,36 @@
+{
+    "accounts": {
+      "emulator-account": {
+        "address": "f8d6e0586b0a20c7",
+        "key": {
+				"type": "file",
+				"location": "emulator-account.pkey"
+			},
+        "chain": "emulator"
+      },
+      "vxtr": {
+			"address": "52f5f92bafc43415",
+			"key": {
+				"type": "file",
+				"location": "vxtr.pkey"
+			}
+		}
+    },
+    "contracts": {
+      "SubscriptionManager": {
+        "source": "./cadence/SubscriptionManager.cdc",
+        "aliases": {
+          "testnet": "52f5f92bafc43415"
+        }
+      }
+    },
+    "deployments": {
+      "testnet": {
+        "testnet-account": ["SubscriptionManager"]
+      }
+    },
+    "networks": {
+      "emulator": "127.0.0.1:3569",
+      "testnet": "access.testnet.nodes.onflow.org:9000"
+    }
+  }
