@@ -1,33 +1,31 @@
 // FlowSubs: SubscriptionManager (Cadence 1.0)
 // Manages recurring, on-chain subscriptions. All access patterns are updated for Cadence 1.0.
 
-pub contract SubscriptionManager {
+access(all) contract SubscriptionManagerV2 {
 
-pub event SubscriptionCreated(
+access(all) event SubscriptionCreated(
     subscriptionID: UInt64,
     payer: Address,
     amount: UFix64,
     allocations: {String: UFix64}
 )
-    pub event SubscriptionPaid(
+access(all) event SubscriptionPaid(
         subscriptionID: UInt64,
         payer: Address,
-        payee: Address,
         amount: UFix64
     )
-    pub event SubscriptionCanceled(
+    access(all) event SubscriptionCanceled(
         subscriptionID: UInt64,
-        payer: Address,
-        payee: Address
+        payer: Address
     )
 
-    pub struct Subscription {
-        pub let id: UInt64
-        pub let payer: Address
-        pub let amount: UFix64
-        pub let allocations: {String: UFix64}
-        pub var lastPaidAt: UFix64?
-        pub var isActive: Bool
+    access(all) struct Subscription {
+        access(all) let id: UInt64
+        access(all) let payer: Address
+        access(all) let amount: UFix64
+        access(all) let allocations: {String: UFix64}
+        access(contract) var lastPaidAt: UFix64?
+        access(contract) var isActive: Bool
 
         init(
             id: UInt64,
@@ -52,18 +50,17 @@ pub event SubscriptionCreated(
         self.subscriptions = {}
     }
 
-    access(all) fun setupAccount() {
-        let sender = AuthAccount(payer: signer)
-        if self.subscriptions[sender.address] == nil {
-            self.subscriptions[sender.address] = {}
+    access(all) fun setupAccount(payer: Address) {
+        if self.subscriptions[payer] == nil {
+            self.subscriptions[payer] = {}
         }
     }
 
     access(all) fun createSubscription(
+        payer: Address,
         amount: UFix64,
         allocations: {String: UFix64}
     ): UInt64 {
-        let payer = AuthAccount(payer: signer).address
         let subID = self.nextSubID
         self.nextSubID = self.nextSubID + 1
         let sub = Subscription(
@@ -72,10 +69,10 @@ pub event SubscriptionCreated(
             amount: amount,
             allocations: allocations
         )
-        if self.subscriptions[payer] == nil {
-            self.subscriptions[payer] = {}
-        }
-        self.subscriptions[payer]![subID] = sub
+        if self.subscriptions[payer] == nil { self.subscriptions[payer] = {} }
+        var map = self.subscriptions[payer]!
+        map[subID] = sub
+        self.subscriptions[payer] = map
         emit SubscriptionCreated(
             subscriptionID: subID,
             payer: payer,
@@ -85,38 +82,19 @@ pub event SubscriptionCreated(
         return subID
     }
 
-    access(all) fun paySubscription(
-        subID: UInt64
-    ) {
-        let payer = AuthAccount(payer: signer).address
-        if let subMap = self.subscriptions[payer], let sub = subMap[subID] {
-            pre {
-                sub.isActive: "Subscription already cancelled."
+    access(all) fun paySubscription(payer: Address, subID: UInt64) {
+        if let subMap = self.subscriptions[payer] {
+            if let sub = subMap[subID] {
+                emit SubscriptionPaid(subscriptionID: subID, payer: sub.payer, amount: sub.amount)
             }
-            let now: UFix64 = getCurrentBlock().timestamp
-            sub.lastPaidAt = now
-            emit SubscriptionPaid(
-                subscriptionID: subID,
-                payer: sub.payer,
-                amount: sub.amount
-            )
         }
     }
 
-    access(all) fun cancelSubscription(
-        subID: UInt64
-    ) {
-        let payer = AuthAccount(payer: signer).address
-        if let subMap = self.subscriptions[payer], let sub = subMap[subID] {
-            pre {
-                sub.isActive: "Subscription is already cancelled."
+    access(all) fun cancelSubscription(payer: Address, subID: UInt64) {
+        if let subMap = self.subscriptions[payer] {
+            if let sub = subMap[subID] {
+                emit SubscriptionCanceled(subscriptionID: subID, payer: sub.payer)
             }
-            sub.isActive = false
-            emit SubscriptionCanceled(
-                subscriptionID: subID,
-                payer: sub.payer,
-                payee: payer
-            )
         }
     }
 

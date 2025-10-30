@@ -18,7 +18,7 @@
       }
     },
     "contracts": {
-      "SubscriptionManager": {
+      "SubscriptionManagerV2": {
         "source": "./cadence/SubscriptionManager.cdc",
         "aliases": {
           "testnet": "52f5f92bafc43415"
@@ -27,7 +27,7 @@
     },
     "deployments": {
       "testnet": {
-        "vxtr": ["SubscriptionManager"]
+        "vxtr": ["SubscriptionManagerV2"]
       }
     },
     "networks": {
