@@ -3,14 +3,12 @@
 
 pub contract SubscriptionManager {
 
-    pub event SubscriptionCreated(
-        subscriptionID: UInt64,
-        payer: Address,
-        payee: Address,
-        amount: UFix64,
-        interval: UInt64,
-        gracePeriod: UInt64
-    )
+pub event SubscriptionCreated(
+    subscriptionID: UInt64,
+    payer: Address,
+    amount: UFix64,
+    allocations: {String: UFix64}
+)
     pub event SubscriptionPaid(
         subscriptionID: UInt64,
         payer: Address,
@@ -26,27 +24,21 @@ pub contract SubscriptionManager {
     pub struct Subscription {
         pub let id: UInt64
         pub let payer: Address
-        pub let payee: Address
         pub let amount: UFix64
-        pub let interval: UInt64
-        pub let gracePeriod: UInt64
+        pub let allocations: {String: UFix64}
         pub var lastPaidAt: UFix64?
         pub var isActive: Bool
 
         init(
             id: UInt64,
             payer: Address,
-            payee: Address,
             amount: UFix64,
-            interval: UInt64,
-            gracePeriod: UInt64
+            allocations: {String: UFix64}
         ) {
             self.id = id
             self.payer = payer
-            self.payee = payee
             self.amount = amount
-            self.interval = interval
-            self.gracePeriod = gracePeriod
+            self.allocations = allocations
             self.lastPaidAt = nil
             self.isActive = true
         }
@@ -68,10 +60,8 @@ pub contract SubscriptionManager {
     }
 
     access(all) fun createSubscription(
-        payee: Address,
         amount: UFix64,
-        interval: UInt64,
-        gracePeriod: UInt64
+        allocations: {String: UFix64}
     ): UInt64 {
         let payer = AuthAccount(payer: signer).address
         let subID = self.nextSubID
@@ -79,10 +69,8 @@ pub contract SubscriptionManager {
         let sub = Subscription(
             id: subID,
             payer: payer,
-            payee: payee,
             amount: amount,
-            interval: interval,
-            gracePeriod: gracePeriod
+            allocations: allocations
         )
         if self.subscriptions[payer] == nil {
             self.subscriptions[payer] = {}
@@ -91,18 +79,16 @@ pub contract SubscriptionManager {
         emit SubscriptionCreated(
             subscriptionID: subID,
             payer: payer,
-            payee: payee,
             amount: amount,
-            interval: interval,
-            gracePeriod: gracePeriod
+            allocations: allocations
         )
         return subID
     }
 
     access(all) fun paySubscription(
-        payer: Address,
         subID: UInt64
     ) {
+        let payer = AuthAccount(payer: signer).address
         if let subMap = self.subscriptions[payer], let sub = subMap[subID] {
             pre {
                 sub.isActive: "Subscription already cancelled."
@@ -112,16 +98,15 @@ pub contract SubscriptionManager {
             emit SubscriptionPaid(
                 subscriptionID: subID,
                 payer: sub.payer,
-                payee: sub.payee,
                 amount: sub.amount
             )
         }
     }
 
     access(all) fun cancelSubscription(
-        payer: Address,
         subID: UInt64
     ) {
+        let payer = AuthAccount(payer: signer).address
         if let subMap = self.subscriptions[payer], let sub = subMap[subID] {
             pre {
                 sub.isActive: "Subscription is already cancelled."
@@ -130,7 +115,7 @@ pub contract SubscriptionManager {
             emit SubscriptionCanceled(
                 subscriptionID: subID,
                 payer: sub.payer,
-                payee: sub.payee
+                payee: payer
             )
         }
     }

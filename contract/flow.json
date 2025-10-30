@@ -9,12 +9,13 @@
         "chain": "emulator"
       },
       "vxtr": {
-			"address": "52f5f92bafc43415",
-			"key": {
-				"type": "file",
-				"location": "vxtr.pkey"
-			}
-		}
+        "address": "52f5f92bafc43415",
+        "key": {
+          "type": "file",
+          "location": "vxtr.pkey"
+        },
+        "chain": "testnet"
+      }
     },
     "contracts": {
       "SubscriptionManager": {
@@ -26,7 +27,7 @@
     },
     "deployments": {
       "testnet": {
-        "testnet-account": ["SubscriptionManager"]
+        "vxtr": ["SubscriptionManager"]
       }
     },
     "networks": {
