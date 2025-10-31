@@ -236,8 +236,8 @@ export default function SubscriptionsSplitPage() {
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 flex flex-col gap-6">
-            <div className="bg-white rounded-2xl shadow-md py-6 px-6">
-              <div className="font-semibold text-[#181A1B] mb-3">
+            <div className="surface rounded-2xl py-6 px-6">
+              <div className="font-semibold text-white mb-3">
                 Monthly Amount
               </div>
               <div className="flex items-end gap-3">
@@ -245,7 +245,7 @@ export default function SubscriptionsSplitPage() {
                   type="number"
                   min={0}
                   step={0.01}
-                  className="bg-[#F8F9FA] text-2xl font-bold rounded-xl border border-[#F3F3F3] p-4 w-56"
+                  className="surface-muted text-2xl font-bold text-white rounded-xl border border-[color:var(--border)] p-4 w-56"
                   placeholder="0.00"
                   value={salary || ""}
                   onChange={(e) => setSalary(parseFloat(e.target.value) || 0)}
@@ -256,12 +256,12 @@ export default function SubscriptionsSplitPage() {
                 </span>
               </div>
             </div>
-            <div className="bg-white rounded-2xl shadow-md py-6 px-6 flex flex-col gap-4">
-              <div className="font-semibold text-[#181A1B]">Allocations</div>
+            <div className="surface rounded-2xl py-6 px-6 flex flex-col gap-4">
+              <div className="font-semibold text-white">Allocations</div>
               {alloc.map((a, i) => (
                 <div
                   key={a.label}
-                  className="rounded-xl border border-[#F3F3F3] p-4"
+                  className="rounded-xl border border-[color:var(--border)] surface-muted p-4"
                 >
                   <div className="flex items-center gap-4 mb-3">
                     <div
@@ -270,7 +270,7 @@ export default function SubscriptionsSplitPage() {
                     >
                       <a.icon className="w-5 h-5" style={{ color: a.color }} />
                     </div>
-                    <div className="text-sm font-semibold text-[#181A1B]">
+                    <div className="text-sm font-semibold text-white">
                       {a.label}
                     </div>
                     <div className="ml-auto font-mono text-sm text-[#13B26B]">
@@ -298,9 +298,9 @@ export default function SubscriptionsSplitPage() {
                 </div>
               ))}
             </div>
-            <div className="bg-white rounded-2xl shadow-md py-5 px-6 flex items-center gap-6">
+            <div className="surface rounded-2xl py-5 px-6 flex items-center gap-6">
               <div className="flex-1 flex flex-col">
-                <label className="font-semibold text-[#181A1B] text-md mb-1 flex items-center gap-2">
+                <label className="font-semibold text-white text-md mb-1 flex items-center gap-2">
                   <Lock className="w-5 h-5 text-[#4F8DFD]" /> Lock in Vault (30
                   days)
                 </label>
@@ -315,7 +315,7 @@ export default function SubscriptionsSplitPage() {
                 className="w-6 h-6 accent-[#4F8DFD]"
               />
             </div>
-            <div className="bg-[#F8F9FA] rounded-xl p-5 text-[#181A1B] flex items-center gap-6 relative overflow-hidden">
+            <div className="surface-muted rounded-xl p-5 text-white flex items-center gap-6 relative overflow-hidden">
               {celebrate && (
                 <motion.div
                   initial={{ opacity: 0 }}
@@ -382,9 +382,9 @@ export default function SubscriptionsSplitPage() {
                 color: a.color,
               }))}
             />
-            <div className="bg-white rounded-2xl shadow-md py-5 px-6 flex items-center gap-4">
+            <div className="surface rounded-2xl py-5 px-6 flex items-center gap-4">
               <div className="flex flex-col">
-                <label className="font-semibold text-[#181A1B] text-md mb-1">
+                <label className="font-semibold text-white text-md mb-1">
                   Pay Subscription
                 </label>
                 <span className="text-xs text-[#707480]">
