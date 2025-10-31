@@ -26,7 +26,7 @@ export default function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="hidden md:flex flex-col w-64 min-h-screen px-4 py-8 surface-muted border-r border-[color:var(--border)] z-30">
+    <aside className="hidden md:flex flex-col w-64 min-h-screen px-4 py-8 bg-white border-r border-[color:rgba(0,239,139,0.2)] shadow-2xl z-30">
       {/* Logo */}
       <Link
         href="/"

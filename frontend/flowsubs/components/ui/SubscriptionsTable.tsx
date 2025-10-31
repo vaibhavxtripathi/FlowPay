@@ -116,7 +116,7 @@ export function SubscriptionsTable({ data, loading, onPay, onCancel }: TableProp
   }
 
   return (
-    <div className="rounded-2xl surface overflow-x-auto">
+    <div className="shadow-lg rounded-2xl bg-white overflow-x-auto border border-violet-100">
       <table className="min-w-full divide-y divide-violet-100">
         <thead>
           <tr>
