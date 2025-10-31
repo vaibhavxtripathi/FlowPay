@@ -18,6 +18,11 @@ export const metadata: Metadata = {
   title: "FlowGuild | Automated Team Treasury & Payouts",
   description:
     "Automated team/DAO payouts on Flow. Transparent, instant, on-chain.",
+  icons: {
+    icon: "/logo.png",
+    shortcut: "/logo.png",
+    apple: "/logo.png",
+  },
 };
 
 export default function RootLayout({

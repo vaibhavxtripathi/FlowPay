@@ -1,7 +1,8 @@
 "use client";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { PanelLeft, CreditCard, Activity, LayoutDashboard, User2 } from "lucide-react";
+import { CreditCard, Activity, LayoutDashboard, User2 } from "lucide-react";
 import { cn } from "../../lib/utils";
 
 const navLinks = [
@@ -32,7 +33,7 @@ export default function Sidebar() {
         href="/"
         className="flex items-center gap-3 mb-10 px-2 text-[color:var(--flow-700)] hover:text-[color:var(--flow-800)] font-bold text-2xl tracking-tight"
       >
-        <PanelLeft className="w-7 h-7" />
+        <Image src="/logo.png" alt="FlowGuild" width={28} height={28} className="rounded-lg" />
         FlowGuild
       </Link>
 

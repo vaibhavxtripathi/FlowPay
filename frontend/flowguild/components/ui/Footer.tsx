@@ -1,10 +1,12 @@
+import Image from "next/image";
+
 export default function Footer() {
   return (
     <footer className="border-t border-[color:var(--border)] relative">
       <div className="mx-auto max-w-7xl px-6 py-16 grid gap-12 md:grid-cols-3">
         <div>
           <div className="text-lg brand flex items-center gap-2 mb-4">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[color:var(--accent)] to-teal-500" />
+            <Image src="/logo.png" alt="FlowGuild" width={32} height={32} className="rounded-lg" />
             FlowGuild
           </div>
           <p className="text-sm text-[color:var(--muted)] leading-relaxed">

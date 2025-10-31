@@ -1,5 +1,6 @@
 "use client";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import FlowAuthButton from "../FlowAuthButton";
 
@@ -15,7 +16,7 @@ export default function Navbar() {
       <div className="mx-auto max-w-7xl px-6 h-16 flex items-center justify-between">
         <div className="flex items-center gap-8">
           <Link href="/" className="text-[20px] brand flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[color:var(--accent)] to-teal-500" />
+            <Image src="/logo.png" alt="FlowGuild" width={32} height={32} className="rounded-lg" />
             FlowGuild
           </Link>
           <div className="hidden md:flex items-center gap-6">
