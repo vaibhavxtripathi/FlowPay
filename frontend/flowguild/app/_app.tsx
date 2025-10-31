@@ -10,8 +10,34 @@ export default function MyApp({ Component, pageProps }: AppProps) {
         position="top-center"
         reverseOrder={false}
         toastOptions={{
-          style: { fontFamily: 'Inter, sans-serif', borderRadius: '12px', boxShadow: '0 1px 10px rgba(139, 92, 246, 0.1)' },
-          duration: 3500,
+          style: {
+            background: 'rgba(26, 26, 36, 0.95)',
+            color: '#ffffff',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+            borderRadius: '12px',
+            boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3)',
+            padding: '14px 18px',
+            fontFamily: 'var(--font-geist-sans), sans-serif',
+          },
+          success: {
+            iconTheme: {
+              primary: '#00ef8b',
+              secondary: '#0a0a0f',
+            },
+          },
+          error: {
+            iconTheme: {
+              primary: '#ef4444',
+              secondary: '#0a0a0f',
+            },
+          },
+          loading: {
+            iconTheme: {
+              primary: '#00ef8b',
+              secondary: '#0a0a0f',
+            },
+          },
+          duration: 4000,
         }}
       />
     </>

@@ -5,8 +5,9 @@ import { StatsCard } from "../../components/ui/StatsCard";
 import { Chart } from "../../components/ui/Chart";
 import Donut from "../../components/ui/Donut";
 import { Timeline } from "../../components/ui/Timeline";
-import { Wallet, TrendingUp, DollarSign } from "lucide-react";
+import { Wallet, TrendingUp, DollarSign, Coins, Zap, RefreshCw } from "lucide-react";
 import { fetchFlowBalance } from "../../lib/flow-scripts";
+import toast from "react-hot-toast";
 
 type ApiEvent = {
   id: string;
@@ -23,16 +24,31 @@ export default function DashboardPage() {
   const { user } = useFlowUser();
   const [events, setEvents] = useState<ApiEvent[]>([]);
   const [loading, setLoading] = useState(false);
+  
+  // Guild Vault State
+  const [vaultBalance, setVaultBalance] = useState(1000); // Initial vault balance
+  const [autoCompounding, setAutoCompounding] = useState(true);
+  const [vaultGrowthData, setVaultGrowthData] = useState<{ time: string; balance: number }[]>([]);
+  const [vaultYieldThisMonth, setVaultYieldThisMonth] = useState(0);
 
   const fetchTx = async () => {
-    if (!user.loggedIn || !user.addr) return;
+    if (!user.loggedIn || !user.addr) {
+      toast.error("Connect your wallet to fetch transactions");
+      return;
+    }
     setLoading(true);
+    toast.loading("Refreshing guild activity...", { id: "refresh-tx" });
     try {
       const res = await fetch(`/api/transactions/${user.addr}`);
       const json = await res.json();
-      if (json?.events) setEvents(json.events);
+      if (json?.events) {
+        setEvents(json.events);
+        toast.success(`Loaded ${json.events.length} events`, { id: "refresh-tx" });
+      } else {
+        toast.success("Activity refreshed", { id: "refresh-tx" });
+      }
     } catch (e) {
-      // swallow for demo
+      toast.error("Failed to fetch transactions", { id: "refresh-tx" });
     } finally {
       setLoading(false);
     }
@@ -121,6 +137,74 @@ export default function DashboardPage() {
       .reduce((sum, e) => sum + (parseFloat(e.amount || "0") || 0), 0);
   }, [events]);
 
+  // Initialize vault growth data
+  useEffect(() => {
+    if (vaultGrowthData.length === 0) {
+      const now = new Date();
+      const hours: { time: string; balance: number }[] = [];
+      let currentBalance = vaultBalance;
+      for (let i = 23; i >= 0; i--) {
+        const time = new Date(now.getTime() - i * 60 * 60 * 1000);
+        hours.push({
+          time: time.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
+          balance: currentBalance * Math.pow(1.00015, i), // Simulate past growth
+        });
+      }
+      setVaultGrowthData(hours);
+    }
+  }, [vaultBalance, vaultGrowthData.length]);
+
+  // Auto-compounding simulation
+  useEffect(() => {
+    if (!autoCompounding) return;
+    
+    const interval = setInterval(() => {
+      setVaultBalance((prev) => {
+        const growthRate = 1.00003; // ~0.003% every 3 seconds = ~8% monthly
+        const newBalance = prev * growthRate;
+        
+        // Update growth data
+        const now = new Date();
+        const currentTime = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+        setVaultGrowthData((prevData) => {
+          const newData = [...prevData.slice(-23), { time: currentTime, balance: newBalance }];
+          return newData;
+        });
+        
+        // Update monthly yield
+        const monthlyGrowth = ((newBalance / 1000 - 1) * 100);
+        setVaultYieldThisMonth(monthlyGrowth);
+        
+        return newBalance;
+      });
+    }, 3000); // Update every 3 seconds
+
+    return () => clearInterval(interval);
+  }, [autoCompounding]);
+
+  // Track processed payout IDs to avoid double-deducting
+  const [processedPayoutIds, setProcessedPayoutIds] = useState<Set<string>>(new Set());
+
+  // Deduct payout amounts from vault when payouts execute
+  useEffect(() => {
+    const executedPayouts = events.filter((e) => e.type === "PayoutExecuted");
+    executedPayouts.forEach((payout) => {
+      if (!processedPayoutIds.has(payout.id)) {
+        const payoutAmount = parseFloat(payout.amount || "0");
+        if (payoutAmount > 0) {
+          setVaultBalance((prev) => {
+            const newBalance = Math.max(0, prev - payoutAmount);
+            toast.success(`Payout of ${payoutAmount.toFixed(2)} FLOW deducted from vault`, {
+              icon: "💰",
+            });
+            return newBalance;
+          });
+          setProcessedPayoutIds((prev) => new Set([...prev, payout.id]));
+        }
+      }
+    });
+  }, [events, processedPayoutIds]);
+
   const memberShares = useMemo(() => {
     const map = new Map<string, number>();
     events
@@ -185,6 +269,92 @@ export default function DashboardPage() {
           />
         </div>
 
+        {/* Guild Vault Section */}
+        <div className="mb-8 surface rounded-2xl p-6 border border-[color:var(--border)] relative overflow-hidden">
+          <div className={`absolute inset-0 bg-gradient-to-br from-[color:var(--accent)]/10 to-transparent opacity-0 transition-opacity duration-300 ${autoCompounding ? 'opacity-100' : ''}`} />
+          <div className="relative z-10">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h2 className="text-2xl font-bold text-white mb-2">Your Guild Vault Is Working for You</h2>
+                <p className="text-sm text-[color:var(--muted)]">
+                  Idle treasury funds automatically earn yield through Flow's DeFi vaults — compounding continuously.
+                </p>
+              </div>
+              <div className="flex items-center gap-3">
+                <span className={`text-xs font-medium px-2 py-1 rounded ${autoCompounding ? 'bg-[color:var(--accent)]/20 text-[color:var(--accent)]' : 'bg-white/5 text-[color:var(--muted)]'}`}>
+                  {autoCompounding ? 'ON' : 'OFF'}
+                </span>
+                <button
+                  onClick={() => {
+                    const newState = !autoCompounding;
+                    setAutoCompounding(newState);
+                    if (newState) {
+                      toast.success("Auto-compounding enabled. Your vault is now earning yield!");
+                    } else {
+                      toast("Auto-compounding paused", { icon: "⏸️" });
+                    }
+                  }}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[color:var(--accent)] focus:ring-offset-2 focus:ring-offset-[color:var(--background)] ${
+                    autoCompounding ? 'bg-[color:var(--accent)]' : 'bg-white/10'
+                  }`}
+                  title={autoCompounding ? "Simulated compounding for demo. Represents automated yield optimization on Flow." : "Click to enable auto-compounding"}
+                >
+                  <span
+                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                      autoCompounding ? 'translate-x-6' : 'translate-x-1'
+                    }`}
+                  />
+                </button>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+              <StatsCard
+                icon={<Coins className="w-5 h-5" />}
+                label="Guild Treasury"
+                value={`${vaultBalance.toFixed(2)}`}
+                status={<span className="text-xs text-[color:var(--muted)]">FLOW</span>}
+              />
+              <StatsCard
+                icon={<TrendingUp className="w-5 h-5" />}
+                label="Auto-Compound Yield"
+                value={`+${vaultYieldThisMonth.toFixed(2)}%`}
+                status={
+                  <span className="text-[color:var(--accent)] text-xs">
+                    {autoCompounding ? 'This month' : 'Paused'}
+                  </span>
+                }
+              />
+              <StatsCard
+                icon={<Zap className="w-5 h-5" />}
+                label="Auto-Compounding"
+                value={autoCompounding ? 'Active' : 'Paused'}
+                status={
+                  <span className={`text-xs ${autoCompounding ? 'text-[color:var(--accent)]' : 'text-[color:var(--muted)]'}`}>
+                    {autoCompounding ? 'Earning yield' : 'Disabled'}
+                  </span>
+                }
+              />
+            </div>
+
+            <div className="mb-4">
+              <Chart
+                title="Vault Growth Over Time"
+                data={vaultGrowthData}
+                xKey="time"
+                yKey="balance"
+                type="line"
+                color="#00ef8b"
+              />
+            </div>
+
+            <div className="flex items-center gap-2 text-xs text-[color:var(--muted)]">
+              <Zap className="w-3.5 h-3.5" />
+              <span>Unallocated funds are auto-deployed into Flow yield pools. Simulated compounding growth shown below.</span>
+            </div>
+          </div>
+        </div>
+
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2">
             <Chart
@@ -201,11 +371,14 @@ export default function DashboardPage() {
               <h3 className="text-lg font-semibold text-white">
                 Guild Activity
               </h3>
-              {loading && (
-                <span className="text-xs text-[color:var(--muted)]">
-                  Loading…
-                </span>
-              )}
+              <button
+                onClick={fetchTx}
+                disabled={loading}
+                className="flex items-center gap-2 px-3 py-1.5 text-xs rounded-lg border border-[color:var(--border)] text-white hover:bg-[color:var(--card-hover)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
+                {loading ? 'Refreshing...' : 'Refresh'}
+              </button>
             </div>
             {events.length ? (
               <Timeline
