@@ -20,6 +20,8 @@ FlowGuild automates team/DAO payouts on Flow. Create a payout once, allocate mem
 
 ## Architecture
 
+![FlowGuild Architecture](./public/flowchart.png)
+
 - Frontend: Next.js 14 (App Router), TypeScript, Tailwind CSS, Framer Motion
 - Flow Integration: FCL (Flow Client Library), Cadence contract (existing “subscription” functions repurposed as payouts)
 - Indexing: Find Labs Events API for reliable historical event data
