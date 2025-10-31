@@ -72,7 +72,7 @@ export default function PublicGuildPage() {
         <div className="mb-6">
           <h1 className="text-3xl md:text-4xl font-bold text-[#101828]">Public Guild</h1>
           <p className="text-[#707480] mt-1">Read-only view for guild activity and member shares.</p>
-          <div className="mt-2 text-xs text-gray-500">Guild ID: {guildId}</div>
+          <div className="mt-2 text-xs text-[color:var(--muted)]">Guild ID: {guildId}</div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
@@ -82,10 +82,10 @@ export default function PublicGuildPage() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 bg-white/90 border border-[color:rgba(0,239,139,0.2)] rounded-2xl shadow-lg p-6">
+          <div className="lg:col-span-2 surface rounded-2xl p-6">
             <div className="flex items-center justify-between mb-3">
-              <h3 className="text-lg font-semibold text-gray-800">Guild Activity</h3>
-              {loading && <span className="text-xs text-gray-500">Loading…</span>}
+              <h3 className="text-lg font-semibold text-white">Guild Activity</h3>
+              {loading && <span className="text-xs text-[color:var(--muted)]">Loading…</span>}
             </div>
             {events.length ? (
               <Timeline
@@ -97,26 +97,26 @@ export default function PublicGuildPage() {
                 }))}
               />
             ) : (
-              <div className="text-sm text-gray-500 py-6 text-center">No activity yet.</div>
+              <div className="text-sm text-[color:var(--muted)] py-6 text-center">No activity yet.</div>
             )}
           </div>
-          <div className="bg-white/90 border border-[color:rgba(0,239,139,0.2)] rounded-2xl shadow-lg p-6">
-            <h3 className="text-lg font-semibold text-gray-800 mb-3">Member Roles</h3>
+          <div className="surface rounded-2xl p-6">
+            <h3 className="text-lg font-semibold text-white mb-3">Member Roles</h3>
             <ul className="space-y-2">
               {members.length ? (
                 members.map((addr, i) => (
-                  <li key={addr} className="flex items-center justify-between text-sm text-gray-700">
-                    <span className="font-mono">{addr}</span>
-                    <span className={`px-2 py-0.5 rounded-full text-xs ${i === 0 ? "bg-[color:rgba(0,239,139,0.1)] text-[color:var(--flow-800)]" : "bg-gray-100 text-gray-700"}`}>
+                  <li key={addr} className="flex items-center justify-between text-sm text-white">
+                    <span className="font-mono text-xs">{addr.slice(0, 12)}...</span>
+                    <span className={`px-2 py-0.5 rounded-full text-xs ${i === 0 ? "bg-[color:var(--accent)]/10 text-[color:var(--accent)]" : "surface-muted text-[color:var(--muted)]"}`}>
                       {i === 0 ? "Admin" : "Member"}
                     </span>
                   </li>
                 ))
               ) : (
-                <li className="text-sm text-gray-500">No members yet.</li>
+                <li className="text-sm text-[color:var(--muted)]">No members yet.</li>
               )}
             </ul>
-            <h3 className="text-lg font-semibold text-gray-800 mt-6 mb-3">Share Distribution</h3>
+            <h3 className="text-lg font-semibold text-white mt-6 mb-3">Share Distribution</h3>
             <Donut data={memberShares.length ? memberShares : [{ name: "—", value: 100, color: "#e5e7eb" }]} />
           </div>
         </div>
